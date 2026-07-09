@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -21,14 +22,17 @@ export default function Navbar() {
       }
     };
 
+    const timer = window.setTimeout(() => {
+      setMounted(true);
+      setIsDark(document.documentElement.classList.contains("dark"));
+    }, 0);
+
     window.addEventListener("scroll", handleScroll);
 
-    // Initialize theme state from DOM class
-    if (typeof window !== "undefined") {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    }
-
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -54,40 +58,37 @@ export default function Navbar() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-[990] transition-all duration-300 ${
-        scrolled 
-          ? "glass-effect shadow-luxury py-5" 
-          : "bg-transparent py-8"
+        scrolled ? "glass-effect shadow-luxury py-3" : "bg-transparent py-4"
       }`}
     >
-      <div className="w-full px-6 md:px-12">
+      <div className="w-full px-4 md:px-8">
         <div className="flex items-center justify-between">
-          
           {/* Logo Brand */}
-          <Link href="/" className="flex items-center gap-5 group">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#0B3158] text-white transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(201,162,39,0.45)] border-2 border-[#C9A227]/30 shrink-0">
-              <span className="font-poppins text-4xl font-black tracking-tighter">
+          <Link href="/" className="flex items-center gap-3.5 group">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0B3158] text-white transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_22px_rgba(201,162,39,0.35)] border border-[#C9A227]/30 shrink-0">
+              <span className="font-poppins text-[1.15rem] font-black tracking-tighter">
                 C<span className="text-[#C9A227]">N</span>R
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-poppins text-3xl font-black leading-none tracking-wider text-[#0B3158] dark:text-white transition-colors duration-300">
+              <span className="font-poppins text-[1.05rem] sm:text-xl font-black leading-none tracking-wider text-[#0B3158] dark:text-white transition-colors duration-300">
                 CNR ASSET
               </span>
-              <span className="font-inter text-sm font-bold tracking-[0.2em] text-[#C9A227] uppercase mt-2 leading-none">
+              <span className="font-inter text-[0.68rem] sm:text-[0.72rem] font-bold tracking-[0.2em] text-[#C9A227] uppercase mt-1 leading-none">
                 Valuers & Engineers
               </span>
             </div>
           </Link>
 
           {/* Desktop Links */}
-          <nav className="hidden lg:flex items-center gap-10">
+          <nav className="hidden lg:flex items-center gap-6">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`font-inter text-base font-bold tracking-wide transition-colors relative py-1 ${
+                  className={`font-inter text-sm font-semibold tracking-wide transition-colors relative py-1 ${
                     isActive
                       ? "text-[#C9A227]"
                       : "text-slate-700 dark:text-slate-200 hover:text-[#0B3158] dark:hover:text-[#C9A227]"
@@ -95,7 +96,7 @@ export default function Navbar() {
                 >
                   {link.name}
                   {isActive && (
-                    <motion.span 
+                    <motion.span
                       layoutId="activeNavIndicator"
                       className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#C9A227]"
                     />
@@ -113,7 +114,11 @@ export default function Navbar() {
               className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 transition-colors cursor-pointer"
               aria-label="Toggle Dark Mode"
             >
-              {isDark ? <Sun className="h-5 w-5 text-[#C9A227]" /> : <Moon className="h-5 w-5" />}
+              {mounted && isDark ? (
+                <Sun className="h-5 w-5 text-[#C9A227]" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </button>
 
             {/* WhatsApp */}
@@ -145,7 +150,11 @@ export default function Navbar() {
               className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 transition-colors"
               aria-label="Toggle Dark Mode"
             >
-              {isDark ? <Sun className="h-5 w-5 text-[#C9A227]" /> : <Moon className="h-5 w-5" />}
+              {mounted && isDark ? (
+                <Sun className="h-5 w-5 text-[#C9A227]" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </button>
 
             {/* Toggle mobile menu */}
@@ -154,10 +163,13 @@ export default function Navbar() {
               className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Toggle Menu"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
-
         </div>
       </div>
 
@@ -181,8 +193,8 @@ export default function Navbar() {
                       href={link.href}
                       onClick={() => setIsOpen(false)}
                       className={`font-inter text-base font-semibold py-2 px-3 rounded-lg transition-colors ${
-                        isActive 
-                          ? "bg-[#0B3158] text-white dark:bg-slate-800 dark:text-[#C9A227]" 
+                        isActive
+                          ? "bg-[#0B3158] text-white dark:bg-slate-800 dark:text-[#C9A227]"
                           : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                       }`}
                     >
